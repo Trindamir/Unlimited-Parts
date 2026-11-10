@@ -1,0 +1,45 @@
+# Заполнение бэклога проекта Unlimited Parts (аналог Azure DevOps Demo Generator)
+name: Seed backlog
+
+on:
+  push:
+    paths: ['.github/workflows/seed-backlog.yml']
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Create labels
+        run: |
+          gh label create "Product Backlog Item" --color 009CCC --description "Элемент бэклога продукта" --force
+          gh label create "Bug" --color CC293D --description "Ошибка" --force
+          gh label create "team: Unlimited Parts Team" --color 0E8A16 --description "Основная команда веб-приложения" --force
+
+      - name: Create backlog items
+        run: |
+          set -e
+          new() {
+            gh issue create --title "$1" --label "$2" --label "team: Unlimited Parts Team" --body "$3" | tail -n1
+          }
+          done_item() { gh issue close "$1" --reason completed; }
+
+          new "Provide customers the ability to track status of the package" "Product Backlog Item" "Покупатель видит текущий статус доставки своей посылки в личном кабинете. Зависит от интеграции с данными компании по доставкам."
+          i=$(new "As a customer, I want to search products by category" "Product Backlog Item" "Фильтрация каталога автозапчастей по категориям."); done_item "$i"
+          i=$(new "Show product availability on the product page" "Product Backlog Item" "Отображение остатков товара на складе на странице товара."); done_item "$i"
+          i=$(new "As a customer, I would like to have a wishlist where I can save items for later" "Product Backlog Item" "Список желаемых товаров покупателя."); done_item "$i"
+          i=$(new "Persist shopping cart between sessions" "Product Backlog Item" "Корзина сохраняется после выхода из аккаунта."); done_item "$i"
+          new "Sel_IE_Navigate Failed in 2488" "Bug" "UI-тест навигации падает в сборке 2488."
+          i=$(new "Send order confirmation email to customer" "Product Backlog Item" "Письмо-подтверждение после оформления заказа."); done_item "$i"
+          new "Customer can apply a promo code at checkout" "Product Backlog Item" "Поле для промокода на странице оформления заказа."
+          new "Recommended products must be based on customer purchase pattern history" "Product Backlog Item" "Рекомендации на основе истории покупок."
+          new "Support multiple shipping addresses" "Product Backlog Item" "Покупатель может сохранить несколько адресов доставки."
+          new "Display estimated delivery date at checkout" "Product Backlog Item" "Ожидаемая дата доставки при оформлении заказа."
+          new "As a customer, I would like to have the ability to send my items as gift" "Product Backlog Item" "Подарочная упаковка и открытка к заказу."
